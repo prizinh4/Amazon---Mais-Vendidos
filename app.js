@@ -10,6 +10,21 @@ AWS.config.update({
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
+// função que realiza o envio para o dynamoDB
+async function enviarParaDynamoDB(item) {
+    const params = {
+        TableName: "MaisVendidos_Amazon",
+        Item: item
+    };
+
+    try {
+        await dynamodb.put(params).promise();
+        console.log("Item inserido com sucesso:", item);
+    } catch (error) {
+        console.error("Erro ao inserir item no DynamoDB:", error);
+    }
+}
+
 async function scraper() {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
@@ -19,7 +34,7 @@ async function scraper() {
     await page.goto("https://www.amazon.com.br/bestsellers/");
     await page.reload();
 
-    // espera até que a lista ordenada (#anonCarousel1 > ol) seja carregada na página
+    // espera até que a lista ordenada carregue
     await page.waitForSelector('#anonCarousel1 > ol');
 
     console.log("Lista ordenada carregada!");
@@ -31,20 +46,23 @@ async function scraper() {
 
     //itera sobre os elementos e extrai informações
     for (const liElement of liElements) {
-
-        const numero = await liElement.$eval('.zg-bdg-text', element => element.innerText);
+        const posicao = await liElement.$eval('.zg-bdg-text', element => element.innerText);
         const nome = await liElement.$eval('.p13n-sc-truncate-desktop-type2', element => element.innerText);
         const estrelas = await liElement.$eval('a[title*="estrelas"]', element => element.getAttribute('title'));
         const avaliacoes = await liElement.$eval('a[title*="estrelas"] .a-size-small', element => element.innerText);
         const preco = await liElement.$eval('div._cDEzb_p13n-sc-price-animation-wrapper_3PzN2', element => element.innerText);
 
-        // imprime as variáveis no terminal
-        console.log("Número:", numero);
-        console.log("Nome:", nome);
-        console.log("Estrelas:", estrelas);
-        console.log("Avaliações:", avaliacoes);
-        console.log("Preço:", preco);
-        console.log("------------------");
+        // constrói o item a ser inserido 
+        const item = {
+            nome: nome,
+            posicao: posicao,
+            estrelas: estrelas,
+            avaliacoes: avaliacoes,
+            preco: preco
+        };
+
+        // envia para o DynamoDB
+        await enviarParaDynamoDB(item);
             
     }
 
