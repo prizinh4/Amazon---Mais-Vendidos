@@ -1,0 +1,79 @@
+service: api-mais-vendidos-amazon
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-2
+
+functions:
+  getProdutos:
+    handler: src/getProdutos.handler
+    events:
+      - http:
+          path: produtos
+          method: get
+  getProdutosPosicao1:
+    handler: src/getProdutosPosicao1.handler
+    events:
+      - http:
+          path: produtos/posicao/1
+          method: get
+  getProdutosPosicao2:
+    handler: src/getProdutosPosicao2.handler
+    events:
+      - http:
+          path: produtos/posicao/2
+          method: get
+  getProdutosPosicao3:
+    handler: src/getProdutosPosicao3.handler
+    events:
+      - http:
+          path: produtos/posicao/3
+          method: get
+
+plugins:
+  - serverless-aws-documentation 
+
+custom:
+  documentation:
+    api:
+      info:
+        version: '1.0'
+        title: 'API de Produtos mais Vendidos da Amazon'
+      paths:
+        '/produtos':
+          get:
+            summary: 'Retorna todos os produtos cadastrados.'
+            description: 'Endpoint para obter todos os produtos cadastrados.'
+            responses:
+              '200':
+                description: 'Produtos encontrados.'
+              '500':
+                description: 'Erro ao obter produtos.'
+        '/produtos/posicao/1':
+          get:
+            summary: 'Retorna os produtos na posição 1 do ranking de mais vendidos.'
+            description: 'Endpoint para obter os produtos que ocuparam a posição 1.'
+            responses:
+              '200':
+                description: 'Produtos encontrados.'
+              '500':
+                description: 'Erro ao obter produtos.'
+        '/produtos/posicao/2':
+          get:
+            summary: 'Retorna os produtos na posição 2 do ranking de mais vendidos.'
+            description: 'Endpoint para obter os produtos que ocuparam a posição 2.'
+            responses:
+              '200':
+                description: 'Produtos encontrados.'
+              '500':
+                description: 'Erro ao obter produtos.'
+        '/produtos/posicao/3':
+          get:
+            summary: 'Retorna os produtos na posição 3 do ranking de mais vendidos.'
+            description: 'Endpoint para obter os produtos que ocuparam a posição 3.'
+            responses:
+              '200':
+                description: 'Produtos encontrados.'
+              '500':
+                description: 'Erro ao obter produtos.'
